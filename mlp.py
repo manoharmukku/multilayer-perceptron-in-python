@@ -1,13 +1,16 @@
 '''
-Desc: Multilayer Perceptron implementation in Python
-Date: 26.09.2018
 Author: Manohar Mukku
+Date: 26.09.2018
+Description: Multilayer Perceptron implementation in Python
 GitHub: https://github.com/manoharmukku/multilayer-perceptron-in-python
 '''
 
 import sys
 import getopt
 import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import oneHotEncoder
 
 def get_arguments(argv):
     '''
@@ -17,12 +20,13 @@ def get_arguments(argv):
 
     # Get the command line arguments
     try:
-        opts, args = getopt.getopt(argv, "hl:m:b:r:f:s:i:", ["help", "lr=", "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
+        opts, args = getopt.getopt(argv, "hl:s:m:b:r:f:x:i:", ["help", "lr=", "sizes=", "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
     except getopt.GetoptError:
         sys.exit(2)
 
     # Defaults
     lr = 0.01
+    sizes = "10,3,3,2"
     momentum = 0
     batch_size = 1
     regularization = 0
@@ -38,6 +42,8 @@ def get_arguments(argv):
             sys.exit()
         elif (opt in ["-l", "--lr"]):
             lr = arg
+        elif (opt in ["-s", "--sizes"]):
+            sizes = arg
         elif (opt in ["-m", "--momentum"]):
             momentum = arg
         elif (opt in ["-b", "--batchsize"]):
@@ -46,7 +52,7 @@ def get_arguments(argv):
             regularization = arg
         elif (opt in ["-f", "--file"]):
             file = arg
-        elif (opt in ["-s", "--seed"]):
+        elif (opt in ["-x", "--seed"]):
             seed = arg
         elif (opt in ["-i", "--iterations"]):
             max_iter = arg
@@ -60,6 +66,15 @@ def get_arguments(argv):
         sys.exit("Oops! Learning rate should be a float value")
     if (lr <= 0):
         sys.exit("Oops! Leraning rate should be positive")
+
+    # Sanity check sizes
+    try:
+        sizes = [int(n) for n in sizes.split(",")]
+    except ValueError:
+        sys.exit("Oops! Layer sizes should be integer values")
+    for size in sizes:
+        if (size <= 0):
+            sys.exit("Oops! Layer sizes should be positive integer values")
 
     # Sanity check momentum
     try:
@@ -103,19 +118,32 @@ def get_arguments(argv):
     if (max_iter <= 0):
         sys.exit("Oops! Number of iterations should be positive")
 
-    return lr, momentum, batch_size, regularization, df, seed, max_iter
+    return lr, sizes, momentum, batch_size, regularization, df, seed, max_iter
 
 def main(argv):
     '''
     Main function which controls the flow of the program
-    Arguments: argv - command line arguments and flags
+    Argument: argv - command line arguments and flags
     '''
 
     # Get the parameters from the command line
-    lr, momentum, batch_size, regularization, df, seed, max_iter = get_arguments(argv)
+    lr, sizes, momentum, batch_size, regularization, df, seed, max_iter = get_arguments(argv)
+
+    # Create an instance of MLP class
+    model = MLP(lr=lr, sizes=sizes, momentum=momentum, batch_size=batch_size, regularization=regularization, seed=seed, max_iter=max_iter)
+
+    # Convert the pandas dataframe to numpy array
+    data = df.values
+
+    # Obtain X and y from data
 
 
+    # Split the data into train and test set
+    X_train, X_test, y_train, y_test = train_test_split()
 
+
+    # Train the model
+    model.fit()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
