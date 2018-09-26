@@ -7,4 +7,4 @@
 - Supports Momentum
 
 ###### References:
-
+- https://towardsdatascience.com/activation-functions-neural-networks-1cbd9f8d91d6
