@@ -87,7 +87,7 @@ def get_arguments(argv):
 
     # Sanity check file
     with open(file) as data_file:
-        df = pd.read_csv(file)
+        df = pd.read_csv(data_file)
 
     # Sanity check seed
     try:
