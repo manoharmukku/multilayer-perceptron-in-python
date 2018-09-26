@@ -12,6 +12,19 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import oneHotEncoder
 
+class MLP(object):
+    def __init__(self, lr, sizes, momentum, batch_size, regularization, seed, max_iter):
+        self.lr = lr
+        self.sizes = sizes
+        self.momentum = momentum
+        self.batch_size = batch_size
+        self.regularization = regularization
+        self.seed = seed
+        self.max_iter = max_iter
+
+    def fit(X, y):
+        
+
 def get_arguments(argv):
     '''
     Get command line arguments using getopt
