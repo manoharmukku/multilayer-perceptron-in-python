@@ -23,7 +23,7 @@ class MLP(object):
         self.max_iter = max_iter
 
     def fit(X, y):
-        
+
 
 def get_arguments(argv):
     '''
@@ -33,13 +33,14 @@ def get_arguments(argv):
 
     # Get the command line arguments
     try:
-        opts, args = getopt.getopt(argv, "hl:s:m:b:r:f:x:i:", ["help", "lr=", "sizes=", "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
+        opts, args = getopt.getopt(argv, "hl:s:a:m:b:r:f:x:i:", ["help", "lr=", "sizes=", "activations=" "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
     except getopt.GetoptError:
         sys.exit(2)
 
     # Defaults
     lr = 0.01
     sizes = "10,3,3,2"
+    activations = "identity,sigmoid,sigmoid,sigmoid"
     momentum = 0
     batch_size = 1
     regularization = 0
@@ -57,6 +58,8 @@ def get_arguments(argv):
             lr = arg
         elif (opt in ["-s", "--sizes"]):
             sizes = arg
+        elif (opt in ["-a", "--activations"]):
+            activations = arg
         elif (opt in ["-m", "--momentum"]):
             momentum = arg
         elif (opt in ["-b", "--batchsize"]):
@@ -88,6 +91,13 @@ def get_arguments(argv):
     for size in sizes:
         if (size <= 0):
             sys.exit("Oops! Layer sizes should be positive integer values")
+
+    # Sanity check activations
+    activations = [act for act in activations.split(",")]
+    activations = ["identity"].extend(activations)
+    for act in activations:
+        if (act not in ["identity", "sigmoid", "tanh", "relu", "leakyrelu", "softmax"]):
+            sys.exit("Oops! Supported activation functions are only identity, sigmoid, tanh, relu, leakyrelu, softmax")
 
     # Sanity check momentum
     try:
