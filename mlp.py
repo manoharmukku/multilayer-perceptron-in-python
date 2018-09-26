@@ -123,7 +123,8 @@ def get_arguments(argv):
 def main(argv):
     '''
     Main function which controls the flow of the program
-    Argument: argv - command line arguments and flags
+    Arguments:
+        argv - command line arguments with flags
     '''
 
     # Get the parameters from the command line
@@ -134,16 +135,27 @@ def main(argv):
 
     # Convert the pandas dataframe to numpy array
     data = df.values
+    data = data.astype(float)
 
-    # Obtain X and y from data
+    # Obtain X from data
+    X = data[:, 0:-1]
 
+    # Obtain y from data
+    y = data[:, -1]
+    onehot = oneHotEncoder(sparse=False)
+    y = onehot.fit_transform(y)
 
-    # Split the data into train and test set
-    X_train, X_test, y_train, y_test = train_test_split()
-
+    # Split the data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=seed)
 
     # Train the model
-    model.fit()
+    model.fit(X_train, y_train)
+
+    # Predict on X_test
+    y_pred = model.predict(X_test)
+
+    # Print the confusion matrix
+    model.confusion(y_pred, y_test)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
