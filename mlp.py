@@ -13,16 +13,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import oneHotEncoder
 
 class MLP(object):
-    def __init__(self, lr, sizes, momentum, batch_size, regularization, seed, max_iter):
+    def __init__(self, lr, sizes, activations, error_function, momentum, batch_size, regularization, seed, max_iter):
         self.lr = lr
         self.sizes = sizes
+        self.activations = activations
+        self.error_function = error_function
         self.momentum = momentum
         self.batch_size = batch_size
         self.regularization = regularization
         self.seed = seed
         self.max_iter = max_iter
+        self.weights = None
+        self.threshold = 0.01
 
-    def fit(X, y):
+    def fit(self, X, y):
+        '''
+        Fits self.weights using MLP training
+        # Arguments:
+            X: Input
+            y: Desired Output
+        '''
+
+        # Initialize weights
+        self.initialize_weights()
+
+
 
 
 def get_arguments(argv):
@@ -33,7 +48,8 @@ def get_arguments(argv):
 
     # Get the command line arguments
     try:
-        opts, args = getopt.getopt(argv, "hl:s:a:m:b:r:f:x:i:", ["help", "lr=", "sizes=", "activations=" "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
+        opts, args = getopt.getopt(argv, "hl:s:a:e:m:b:r:f:x:i:", ["help", "lr=", "sizes=", "activations=", "error_function=", \
+            "momentum=", "batchsize=", "regularization=", "file=", "seed=", "iterations="])
     except getopt.GetoptError:
         sys.exit(2)
 
@@ -41,6 +57,7 @@ def get_arguments(argv):
     lr = 0.01
     sizes = "10,3,3,2"
     activations = "identity,sigmoid,sigmoid,sigmoid"
+    error_function = "mse"
     momentum = 0
     batch_size = 1
     regularization = 0
@@ -60,6 +77,8 @@ def get_arguments(argv):
             sizes = arg
         elif (opt in ["-a", "--activations"]):
             activations = arg
+        elif (opt in ["-e", "--error_function"]):
+            error_function = arg
         elif (opt in ["-m", "--momentum"]):
             momentum = arg
         elif (opt in ["-b", "--batchsize"]):
@@ -98,6 +117,10 @@ def get_arguments(argv):
     for act in activations:
         if (act not in ["identity", "sigmoid", "tanh", "relu", "leakyrelu", "softmax"]):
             sys.exit("Oops! Supported activation functions are only identity, sigmoid, tanh, relu, leakyrelu, softmax")
+
+    # Sanity check error function
+    if (error_function not in ["mse"]):
+        sys.exit("Oops! Invalid error function")
 
     # Sanity check momentum
     try:
@@ -141,7 +164,7 @@ def get_arguments(argv):
     if (max_iter <= 0):
         sys.exit("Oops! Number of iterations should be positive")
 
-    return lr, sizes, momentum, batch_size, regularization, df, seed, max_iter
+    return lr, sizes, activations, error_function, momentum, batch_size, regularization, df, seed, max_iter
 
 def main(argv):
     '''
@@ -151,10 +174,11 @@ def main(argv):
     '''
 
     # Get the parameters from the command line
-    lr, sizes, momentum, batch_size, regularization, df, seed, max_iter = get_arguments(argv)
+    lr, sizes, activations, error_function, momentum, batch_size, regularization, df, seed, max_iter = get_arguments(argv)
 
     # Create an instance of MLP class
-    model = MLP(lr=lr, sizes=sizes, momentum=momentum, batch_size=batch_size, regularization=regularization, seed=seed, max_iter=max_iter)
+    model = MLP(lr=lr, sizes=sizes, activations=activations, error_function=error_function, momentum=momentum, batch_size=batch_size, \
+        regularization=regularization, seed=seed, max_iter=max_iter)
 
     # Convert the pandas dataframe to numpy array
     data = df.values
@@ -163,7 +187,7 @@ def main(argv):
     # Obtain X from data
     X = data[:, 0:-1]
 
-    # Obtain y from data
+    # Obtain y from data and onehot
     y = data[:, -1]
     onehot = oneHotEncoder(sparse=False)
     y = onehot.fit_transform(y)
